@@ -17,6 +17,9 @@ export class MarkTheWords extends LitElement {
     //parse text
     this.wordList = this.innerText.split(/\s+/g);
     this.innerText = "";
+    this.promptContent = "";
+    this.isEnabled = true;
+    this.buttonText = "Check";
   }
 
   // properties that you wish to use as data in HTML, CSS, and the updated life-cycle
@@ -24,7 +27,10 @@ export class MarkTheWords extends LitElement {
     return {
       wordList: { type: Array },
       answers: { type: String, reflect: true },
-      correctAnswers: { type: Array }
+      correctAnswers: { type: Array },
+      promptContent: {type: String},
+      isEnabled: {type: Boolean},
+      buttonText: {type: String}
     };
   }
 
@@ -37,6 +43,10 @@ export class MarkTheWords extends LitElement {
       }
       if (propName === "answers" && this[propName]) {
         this.correctAnswers = this[propName].split(",");
+        for(var i =  0; i < this.correctAnswers.length; i++){
+          this.correctAnswers[i] = this.correctAnswers[i].toUpperCase();
+          console.log("correct answer list: " + this.correctAnswers[i]);
+        }
         this.answers = null;
       }
     });
@@ -147,18 +157,40 @@ export class MarkTheWords extends LitElement {
   }
 
   checkAnswer(e) {
-    const selected = this.shadowRoot.querySelectorAll("#textArea span[data-selected]");
-    console.log(selected);
-    for (var i = 0; i < selected.length; i++) {
-      const el = selected[i];
-      console.log(this.correctAnswers);
-      console.log(el.innerText);
-      console.log(this.correctAnswers.includes(el.innerText));
-      if (this.correctAnswers.includes(el.innerText.replace(/[&#^,+()$~%.":*?<>{}]/g, ''))) {
-        el.setAttribute("data-status", "correct");
+    
+    if(this.isEnabled){
+      this.isEnabled = false;
+      this.buttonText = "Try Again";
+
+      const selected = this.shadowRoot.querySelectorAll("#textArea span[data-selected]");
+      console.log(selected);
+      for (var i = 0; i < selected.length; i++) {
+        const el = selected[i];
+        console.log(this.correctAnswers);
+        console.log("selected: " + el.innerText.toUpperCase());
+        console.log(this.correctAnswers.includes(el.innerText));
+        
+        if (this.correctAnswers.includes(el.innerText.replace(/[&#^,+()$~%.":*?<>{}]/g, '').toUpperCase())) {
+          el.setAttribute("data-status", "correct");
+        }
+        else {
+          el.setAttribute("data-status", "incorrect");
+        }
       }
-      else {
-        el.setAttribute("data-status", "incorrect");
+
+    } else {
+      this.isEnabled = true;
+      this.buttonText = "Check";
+      
+      const selected = this.shadowRoot.querySelectorAll("#textArea span[data-selected]");
+      console.log(selected);
+      for (var i = 0; i < selected.length; i++) {
+        const el = selected[i];
+        
+        if(el.getAttribute("data-status")){
+          el.removeAttribute("data-status");
+          el.removeAttribute("data-selected");
+        }
       }
     }
   }
@@ -166,10 +198,14 @@ export class MarkTheWords extends LitElement {
   // HTML - specific to Lit
   render() {
     return html`
-      <div id="textArea">
+      <div id="promptArea">
+        <h1>
+        ${this.promptContent}
+        </h1>
       </div>
+      <div id="textArea"></div>
         <div class = "buttons">
-          <button @click="${this.checkAnswer}">Check</button>
+          <button @click="${this.checkAnswer}">${this.buttonText}</button>
       </div>
       <div class="correct">
         <h1>Correct Answers</h1>
@@ -182,7 +218,10 @@ export class MarkTheWords extends LitElement {
   // HAX specific callback
   // This teaches HAX how to edit and work with your web component
   /**
-   * haxProperties integration via file reference
+   * ${this.isEnabled ?
+        html`<div id="textArea"></div>` :
+        html`<div id="textArea"></div>`
+      }
    */
   static get haxProperties() {
     return new URL(`../lib/mark-the-words.haxProperties.json`, import.meta.url).href;
