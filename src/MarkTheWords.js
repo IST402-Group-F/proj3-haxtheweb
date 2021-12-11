@@ -20,7 +20,9 @@ export class MarkTheWords extends LitElement {
     this.promptContent = "";
     this.isEnabled = true;
     this.buttonText = "Check";
-  }
+    this.numberCorrect = 0;
+    this.numberGuessed = 0;
+    }
 
   // properties that you wish to use as data in HTML, CSS, and the updated life-cycle
   static get properties() {
@@ -28,9 +30,12 @@ export class MarkTheWords extends LitElement {
       wordList: { type: Array },
       answers: { type: String, reflect: true },
       correctAnswers: { type: Array },
+      missedAnswers: {type: Array },
       promptContent: {type: String},
       isEnabled: {type: Boolean},
-      buttonText: {type: String}
+      buttonText: {type: String},
+      numberCorrect: {type: Number},
+      numberGuessed: {type: Number}
     };
   }
 
@@ -47,8 +52,10 @@ export class MarkTheWords extends LitElement {
           this.correctAnswers[i] = this.correctAnswers[i].toUpperCase();
           console.log("correct answer list: " + this.correctAnswers[i]);
         }
+        
         this.answers = null;
       }
+      
     });
   }
 
@@ -140,6 +147,9 @@ export class MarkTheWords extends LitElement {
       margin-left: 8px;
       line-height: 14px;
     }
+    span[check-mode="active"]{
+      pointer-events: none;
+    }
     .buttons,.correct {
       margin: 8px;
     }
@@ -157,10 +167,18 @@ export class MarkTheWords extends LitElement {
   }
 
   checkAnswer(e) {
+
     
     if(this.isEnabled){
       this.isEnabled = false;
       this.buttonText = "Try Again";
+      
+      for(var i = 0; i < this.wordList.length; i++){
+        console.log("gg");
+        if(this.correctAnswers.includes(this.wordList[i].replace(/[&#^,+()$~%.":*?<>{}]/g, '').toUpperCase())){
+          this.numberCorrect++;
+        }
+      }
 
       const selected = this.shadowRoot.querySelectorAll("#textArea span[data-selected]");
       console.log(selected);
@@ -172,15 +190,28 @@ export class MarkTheWords extends LitElement {
         
         if (this.correctAnswers.includes(el.innerText.replace(/[&#^,+()$~%.":*?<>{}]/g, '').toUpperCase())) {
           el.setAttribute("data-status", "correct");
+          this.numberGuessed++;
+          console.log("number guessed " + this.numberGuessed);
         }
         else {
           el.setAttribute("data-status", "incorrect");
+          if(this.numberGuessed > 0){
+            this.numberGuessed--;
+          }
         }
+      }
+      const allWords = this.shadowRoot.querySelectorAll("#textArea span");
+      for(var i = 0; i < allWords.length; i++){
+        const el = allWords[i];
+
+        el.setAttribute("check-mode", "active");
       }
 
     } else {
       this.isEnabled = true;
       this.buttonText = "Check";
+      this.numberGuessed = 0;
+      this.numberCorrect = 0;
       
       const selected = this.shadowRoot.querySelectorAll("#textArea span[data-selected]");
       console.log(selected);
@@ -191,6 +222,12 @@ export class MarkTheWords extends LitElement {
           el.removeAttribute("data-status");
           el.removeAttribute("data-selected");
         }
+      }
+      const allWords = this.shadowRoot.querySelectorAll("#textArea span");
+      for(var i = 0; i < allWords.length; i++){
+        const el = allWords[i];
+
+        el.setAttribute("check-mode", "inactive");
       }
     }
   }
@@ -206,6 +243,9 @@ export class MarkTheWords extends LitElement {
       <div id="textArea"></div>
         <div class = "buttons">
           <button @click="${this.checkAnswer}">${this.buttonText}</button>
+          ${this.isEnabled ?
+          html`?/?` :
+          html`${this.numberGuessed}/${this.numberCorrect} ${Math.round(10*((this.numberGuessed/this.numberCorrect) * 100))/10}%`}
       </div>
       <div class="correct">
         <h1>Correct Answers</h1>
@@ -222,6 +262,9 @@ export class MarkTheWords extends LitElement {
         html`<div id="textArea"></div>` :
         html`<div id="textArea"></div>`
       }
+
+      
+    }
    */
   static get haxProperties() {
     return new URL(`../lib/mark-the-words.haxProperties.json`, import.meta.url).href;
