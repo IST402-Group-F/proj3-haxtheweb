@@ -17,14 +17,25 @@ export class MarkTheWords extends LitElement {
     //parse text
     this.wordList = this.innerText.split(/\s+/g);
     this.innerText = "";
-  }
+    this.promptContent = "";
+    this.isEnabled = true;
+    this.buttonText = "Check";
+    this.numberCorrect = 0;
+    this.numberGuessed = 0;
+    }
 
   // properties that you wish to use as data in HTML, CSS, and the updated life-cycle
   static get properties() {
     return {
       wordList: { type: Array },
       answers: { type: String, reflect: true },
-      correctAnswers: { type: Array }
+      correctAnswers: { type: Array },
+      missedAnswers: {type: Array },
+      promptContent: {type: String},
+      isEnabled: {type: Boolean},
+      buttonText: {type: String},
+      numberCorrect: {type: Number},
+      numberGuessed: {type: Number}
     };
   }
 
@@ -37,8 +48,14 @@ export class MarkTheWords extends LitElement {
       }
       if (propName === "answers" && this[propName]) {
         this.correctAnswers = this[propName].split(",");
+        for(var i =  0; i < this.correctAnswers.length; i++){
+          this.correctAnswers[i] = this.correctAnswers[i].toUpperCase();
+          console.log("correct answer list: " + this.correctAnswers[i]);
+        }
+        
         this.answers = null;
       }
+      
     });
   }
 
@@ -130,6 +147,9 @@ export class MarkTheWords extends LitElement {
       margin-left: 8px;
       line-height: 14px;
     }
+    span[check-mode="active"]{
+      pointer-events: none;
+    }
     .buttons,.correct {
       margin: 8px;
     }
@@ -147,18 +167,66 @@ export class MarkTheWords extends LitElement {
   }
 
   checkAnswer(e) {
-    const selected = this.shadowRoot.querySelectorAll("#textArea span[data-selected]");
-    console.log(selected);
-    for (var i = 0; i < selected.length; i++) {
-      const el = selected[i];
-      console.log(this.correctAnswers);
-      console.log(el.innerText);
-      console.log(this.correctAnswers.includes(el.innerText));
-      if (this.correctAnswers.includes(el.innerText.replace(/[&#^,+()$~%.":*?<>{}@]/g, ''))) {
-        el.setAttribute("data-status", "correct");
+    
+    if(this.isEnabled){
+      this.isEnabled = false;
+      this.buttonText = "Try Again";
+      
+      for(var i = 0; i < this.wordList.length; i++){
+        console.log("gg");
+        if(this.correctAnswers.includes(this.wordList[i].replace(/[&#^,+()$~%.":*?<>{}]/g, '').toUpperCase())){
+          this.numberCorrect++;
+        }
       }
-      else {
-        el.setAttribute("data-status", "incorrect");
+
+      const selected = this.shadowRoot.querySelectorAll("#textArea span[data-selected]");
+      console.log(selected);
+      for (var i = 0; i < selected.length; i++) {
+        const el = selected[i];
+        console.log(this.correctAnswers);
+        console.log("selected: " + el.innerText.toUpperCase());
+        console.log(this.correctAnswers.includes(el.innerText));
+        
+        if (this.correctAnswers.includes(el.innerText.replace(/[&#^,+()$~%.":*?<>{}]/g, '').toUpperCase())) {
+          el.setAttribute("data-status", "correct");
+          this.numberGuessed++;
+          console.log("number guessed " + this.numberGuessed);
+        }
+        else {
+          el.setAttribute("data-status", "incorrect");
+          if(this.numberGuessed > 0){
+            this.numberGuessed--;
+          }
+        }
+      }
+      const allWords = this.shadowRoot.querySelectorAll("#textArea span");
+      for(var i = 0; i < allWords.length; i++){
+        const el = allWords[i];
+
+        el.setAttribute("check-mode", "active");
+      }
+
+    } else {
+      this.isEnabled = true;
+      this.buttonText = "Check";
+      this.numberGuessed = 0;
+      this.numberCorrect = 0;
+      
+      const selected = this.shadowRoot.querySelectorAll("#textArea span[data-selected]");
+      console.log(selected);
+      for (var i = 0; i < selected.length; i++) {
+        const el = selected[i];
+        
+        if(el.getAttribute("data-status")){
+          el.removeAttribute("data-status");
+          el.removeAttribute("data-selected");
+        }
+      }
+      const allWords = this.shadowRoot.querySelectorAll("#textArea span");
+      for(var i = 0; i < allWords.length; i++){
+        const el = allWords[i];
+
+        el.setAttribute("check-mode", "inactive");
       }
     }
   }
@@ -166,10 +234,17 @@ export class MarkTheWords extends LitElement {
   // HTML - specific to Lit
   render() {
     return html`
-      <div id="textArea">
+      <div id="promptArea">
+        <h1>
+        ${this.promptContent}
+        </h1>
       </div>
+      <div id="textArea"></div>
         <div class = "buttons">
-          <button @click="${this.checkAnswer}">Check</button>
+          <button @click="${this.checkAnswer}">${this.buttonText}</button>
+          ${this.isEnabled ?
+          html`?/?` :
+          html`${this.numberGuessed}/${this.numberCorrect} ${Math.round(10*((this.numberGuessed/this.numberCorrect) * 100))/10}%`}
       </div>
       <div class="correct">
         <h1>Correct Answers</h1>
@@ -182,7 +257,13 @@ export class MarkTheWords extends LitElement {
   // HAX specific callback
   // This teaches HAX how to edit and work with your web component
   /**
-   * haxProperties integration via file reference
+   * ${this.isEnabled ?
+        html`<div id="textArea"></div>` :
+        html`<div id="textArea"></div>`
+      }
+
+      
+    }
    */
   static get haxProperties() {
     return new URL(`../lib/mark-the-words.haxProperties.json`, import.meta.url).href;
