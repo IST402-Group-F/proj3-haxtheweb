@@ -95,9 +95,9 @@ export class MarkTheWords extends LitElement {
   static get styles() {
     return [css`
     :host {
-      display: block;
+      display: grid;
       padding: 16px;
-      margin: 16px;
+      margin: 0px;
       border: 2px solid black;
     }
     span {
@@ -150,8 +150,36 @@ export class MarkTheWords extends LitElement {
     span[check-mode="active"]{
       pointer-events: none;
     }
-    .buttons,.correct {
+    .buttons{
+      grid-column: 1;
+      grid-row: 3;
       margin: 8px;
+    }
+    .correct{
+      grid-column: 1;
+      grid-row: 3;
+      margin-top:20px;
+    }
+    #promptArea{
+      margin-bottom:0px;
+      maring-top:0px;
+      grid-column: 1;
+      grid-row: 1;
+    }
+    #textArea{
+      grid-column:1;
+      grid-row: 2;
+      margin-top: 0px;
+    }
+    #scoreArea{
+      padding-bottom: 10px;
+      padding-left: 10px;
+      padding-right: 10px;
+      grid-column: 3;
+      grid-row: 2;
+      border: solid;
+      padding-top: 0px;
+    }
     }
   `];
   }
@@ -173,7 +201,6 @@ export class MarkTheWords extends LitElement {
       this.buttonText = "Try Again";
       
       for(var i = 0; i < this.wordList.length; i++){
-        console.log("gg");
         if(this.correctAnswers.includes(this.wordList[i].replace(/[&#^,+()$~%.":*?<>{}]/g, '').toUpperCase())){
           this.numberCorrect++;
         }
@@ -240,16 +267,26 @@ export class MarkTheWords extends LitElement {
         </h1>
       </div>
       <div id="textArea"></div>
+
         <div class = "buttons">
           <button @click="${this.checkAnswer}">${this.buttonText}</button>
           ${this.isEnabled ?
-          html`?/?` :
+          html`` :
           html`${this.numberGuessed}/${this.numberCorrect} ${Math.round(10*((this.numberGuessed/this.numberCorrect) * 100))/10}%`}
       </div>
+
       <div class="correct">
         <h1>Correct Answers</h1>
-        <ul> ${this.correctAnswers.map((item, i) => html`<li data-index="${i}">${item}</li>`)}
-    </ul>
+        <ul> ${this.correctAnswers.map((item, i) => html`<li data-index="${i}">${item}</li>`)}</ul>
+      </div>
+
+      <div id="scoreArea">
+      <h1>Scoring</h1>
+      <p>Correct Words(+1Pt) </p>
+      <p>Incorrect Words(-1Pt) </p>
+      <p>Missing Words(0Pts)</p>
+      </div>
+
     </div>
     `;
   }
