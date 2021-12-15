@@ -180,6 +180,11 @@ export class MarkTheWords extends LitElement {
       border: solid;
       padding-top: 0px;
     }
+    #scoreExp{
+      margin-top: 1px;
+      margin-bottom: 1px;
+      text-decoration: underline;
+    }
     }
   `];
   }
@@ -275,16 +280,11 @@ export class MarkTheWords extends LitElement {
           html`${this.numberGuessed}/${this.numberCorrect} ${Math.round(10*((this.numberGuessed/this.numberCorrect) * 100))/10}%`}
       </div>
 
-      <div class="correct">
-        <h1>Correct Answers</h1>
-        <ul> ${this.correctAnswers.map((item, i) => html`<li data-index="${i}">${item}</li>`)}</ul>
-      </div>
-
       <div id="scoreArea">
       <h1>Scoring</h1>
-      <p>Correct Words(+1Pt) </p>
-      <p>Incorrect Words(-1Pt) </p>
-      <p>Missing Words(0Pts)</p>
+      <p id="scoreExp">Correct Words(+1Pt) </p>
+      <p id="scoreExp">Incorrect Words(-1Pt) </p>
+      <p id="scoreExp">Missing Words(0Pts)</p>
       </div>
 
     </div>
@@ -293,15 +293,6 @@ export class MarkTheWords extends LitElement {
 
   // HAX specific callback
   // This teaches HAX how to edit and work with your web component
-  /**
-   * ${this.isEnabled ?
-        html`<div id="textArea"></div>` :
-        html`<div id="textArea"></div>`
-      }
-
-      
-    }
-   */
   static get haxProperties() {
     return new URL(`../lib/mark-the-words.haxProperties.json`, import.meta.url).href;
   }

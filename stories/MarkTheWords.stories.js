@@ -5,21 +5,25 @@ export default {
   title: 'Project 3',
   component: 'mark-the-words',
   argTypes: {
-    innerText: "",
-    promptContext: "",
-    }
-  };
-
-function MarkTheWordsTemplate({innerText, promptContent, }) {
-  return html` 
-  <mark-the-words innerText="${innerText}" promptContent="${promptContent}>
-  </mark-the-words> `
+    promptContent: {control: 'text'},
+    bodyContent: {control: 'text'},
+    answerContent: {control: 'text'}
+  }
 };
 
-export const MarkTheWords = MarkTheWordsTemplate.bind({});
-MarkTheWords.args = {
-  innerText: '',
-  promptContext: '',
+function MarkTheWordsTemplate({bodyContent, promptContent, answerContent}) {
+  return html` 
+  <mark-the-words answers="${answerContent}" promptContent="${promptContent}">
+  ${bodyContent}
+  </mark-the-words>`
+};
+export const MarkTheWords = Template.bind({});
+
+export const MarkTheWordsFill = MarkTheWordsTemplate.bind({});
+MarkTheWordsFill.args = {
+  answerContent: 'this,is,a',
+  promptContent: 'Select the words "this", "is" and "a"',
+  bodyContent: 'This is a test sentence. Please select the correct words'
 };
 
 //i was trying to base off the argument stuff on the constructor bc i think thats what i did last time for the learning card

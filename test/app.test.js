@@ -9,13 +9,17 @@ describe('MarkTheWords', () => {
     element = await fixture(html`<mark-the-words></mark-the-words>`);
   });
 
-  it('renders a h1', () => {
-    const h1 = element.shadowRoot.querySelector('h1');
-    expect(h1).to.exist;
-    expect(h1.textContent).to.equal('cool');
+  it('renders paragraph', () => {
+    const paragraph = element.shadowRoot
+    .querySelector('#textArea');
+    expect(paragraph).to.exist;
   });
 
-  it('passes the a11y audit', async () => {
-    await expect(element).shadowDom.to.be.accessible();
+  
+
+  it('renders prompt', () => {
+    const prompt = element.shadowRoot
+    .querySelector('#promptArea');
+    expect(prompt).to.exist;
   });
 });
