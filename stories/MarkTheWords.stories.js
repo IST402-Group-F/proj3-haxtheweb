@@ -5,21 +5,21 @@ export default {
   title: 'Project 3',
   component: 'mark-the-words',
   argTypes: {
+    innerText: "",
+    promptContext: "",
+    }
+  };
 
-  }
-};
-
-function MarkTheWordsTemplate({promptContent, }) {
+function MarkTheWordsTemplate({innerText, promptContent, }) {
   return html` 
-  <mark-the-words>
-  ${this.promptContent}
+  <mark-the-words innerText="${innerText}" promptContent="${promptContent}>
   </mark-the-words> `
 };
-export const MarkTheWords = Template.bind({});
 
 export const MarkTheWords = MarkTheWordsTemplate.bind({});
 MarkTheWords.args = {
-
+  innerText: '',
+  promptContext: '',
 };
 
 //i was trying to base off the argument stuff on the constructor bc i think thats what i did last time for the learning card
